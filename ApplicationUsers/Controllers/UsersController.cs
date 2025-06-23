@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ApplicationUsers.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -19,21 +19,42 @@ namespace ApplicationUsers.Controllers
 
         [HttpGet()]
 
-        public async Task<IEnumerable<User>> Get()
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
         {
 
-            return await _databaseService.QueryAsync<User>($"select * FROM usuarios;");
+            return Ok( await _databaseService.QueryAsync<User>($"SELECT * FROM usuarios;"));
 
         }
 
         [HttpPost()]
 
-        public async Task<IActionResult> Post([FromQuery] User user)
+        public async Task<IActionResult> CreateUser([FromQuery] User user)
         {
-          await _databaseService.ExecuteAsync($"INSERT INTO Usuarios(Nome, CPF, DataNascimento, Sexo) VALUES ('{user.Nome}','{user.Cpf}','{user.DataNascimento}','{user.Sexo}')");
+          await _databaseService.ExecuteAsync($"INSERT INTO Usuarios(Nome, CPF, DataNascimento, Sexo) VALUES ('{user.Nome}','{user.Cpf}','{user.DataNascimento.ToString("yyyy/MM/dd")}','{user.Sexo}')");
           return Ok();
         }
 
-        
+        [HttpGet()]
+
+        public async Task<ActionResult<User>> GetUserById([FromQuery] int id)
+        {
+
+            return Ok(await _databaseService.QueryAsync<User>($"SELECT * FROM usuarios WHERE id={id};"));
+        }
+
+        [HttpPut()]
+
+        public async Task<ActionResult> UpdateUser([FromQuery] User user)
+        {
+            return Ok(await _databaseService.ExecuteAsync($"UPDATE usuarios SET Nome='{user.Nome}', CPF='{user.Cpf}',DataNascimento='{user.DataNascimento}',Sexo='{user.Sexo}' WHERE id={user.Id}"));
+        }
+
+        [HttpDelete()]
+
+        public async Task<ActionResult> DeleteUser([FromQuery] int id)
+        {
+            return Ok(await _databaseService.ExecuteAsync($"DELETE FROM usuarios WHERE id='{id}'"));
+        }
+
     }
 }
